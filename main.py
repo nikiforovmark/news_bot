@@ -20,10 +20,8 @@ import serializer
 bot = Bot(token=config.TOKEN)  # from BotFather
 dp = Dispatcher(bot=bot)
 
-cache_news = ""
-cache_quotes = ""
-cache_time_quotes = datetime.datetime.now()
-cache_time_news = datetime.datetime.now()
+cache_news = cache_quotes = cache_invest = ""
+cache_time_news = cache_time_quotes = cache_time_invest = datetime.datetime.now()
 
 # file_log = logging.FileHandler("sample.log", mode="w")
 file_log = logging.FileHandler("sample.log")
@@ -164,6 +162,22 @@ async def get_answer(message: types.Message):
         await bot.send_message(message.chat.id, mess, parse_mode='html')
     else:
         await bot.send_message(message.chat.id, "Пустое сообщение", parse_mode='html')
+
+
+@dp.message_handler(commands=['invest'])
+async def show_quotes(message: types.Message):
+    global cache_invest
+    global cache_time_invest
+    logging.info(f"{message.from_user.id} {time.asctime()} {message.text}")
+    if cache_invest == "" or datetime.datetime.now() - datetime.timedelta(minutes=15) > cache_time_invest:
+        portfolio = parsing.parsing_invest_portfolio()
+        # mess = f"{portfolio[0]}\n{portfolio[1]}"
+        mess = portfolio
+        await bot.send_message(message.chat.id, mess, parse_mode='html')
+        cache_invest = mess
+        cache_time_invest = datetime.datetime.now()
+    else:
+        await bot.send_message(message.chat.id, cache_invest, parse_mode='html')
 
 
 # @dp.message_handler(commands=['help'])
