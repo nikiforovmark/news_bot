@@ -4,5 +4,4 @@ venv/
 .env
 *.log
 dan.json
-config.py
 old_main.py
