@@ -97,7 +97,6 @@ async def set_dmb(message: types.Message):
         day = int(args[1])
         month = int(args[2])
         year = int(args[3])
-        # Простейшая проверка корректности даты
         datetime.datetime(year, month, day)
     except (ValueError, TypeError):
         await bot.send_message(message.chat.id, "Некорректная дата. Используйте числа.", parse_mode='html')
@@ -146,37 +145,45 @@ async def show_news(message: types.Message):
 @dp.message_handler(commands=['weather'])
 async def show_weather(message: types.Message):
     uid = message.from_user.id
-    city = message.text[9:]
+    city = message.text[9:].strip()
     logging.info(f"{uid} {time.asctime()} {message.text}")
 
     data = serializer.get_data()
-    if str(uid) not in data["users"]:
-        data["users"][f"{uid}"] = {
+    user_id_str = str(uid)
+
+    if user_id_str not in data["users"]:
+        data["users"][user_id_str] = {
             "requests_count": 0,
             "weather_city": city
         }
+    else:
+        if "weather_city" not in data["users"][user_id_str]:
+            data["users"][user_id_str]["weather_city"] = city
+        if "requests_count" not in data["users"][user_id_str]:
+            data["users"][user_id_str]["requests_count"] = 0
 
-    if city == data["users"][f"{uid}"]["weather_city"] == "":
+    if city:
+        data["users"][user_id_str]["weather_city"] = city
+
+    if not city and not data["users"][user_id_str]["weather_city"]:
         mess = "<b>Укажите город, например: '/weather Архангельск'</b>"
-        data["users"][f"{uid}"]["requests_count"] += 1
+        data["users"][user_id_str]["requests_count"] += 1
         serializer.write(data)
         await bot.send_message(message.chat.id, mess, parse_mode='html')
-        return 0
+        return
 
-    tasks = []
+    data["users"][user_id_str]["requests_count"] += 1
+    serializer.write(data)
 
     if os.name == "nt":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
-    if city != "":
-        data["users"][f"{uid}"]["weather_city"] = city
+    current_weather = asyncio.create_task(
+        weather.get_weather(data["users"][user_id_str]["weather_city"])
+    )
 
-    data["users"][f"{uid}"]["requests_count"] += 1
-    serializer.write(data)
-    current_weather = asyncio.create_task(weather.get_weather(data["users"][f"{uid}"]["weather_city"]))
-    tasks.append(current_weather)
-
-    await bot.send_message(message.chat.id, await list(asyncio.as_completed(tasks))[0], parse_mode='html')
+    result = await current_weather
+    await bot.send_message(message.chat.id, result, parse_mode='html')
 
 
 @dp.message_handler(commands=['test'])
