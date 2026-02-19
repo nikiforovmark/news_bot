@@ -1,21 +1,24 @@
 import json
+import os
 
-data = ""
+DATA_FILE = "dan.json"
 
 
-def init():
-    with open("dan.json", "r", encoding="UTF-8") as read_file:
-        global data
-        data = json.load(read_file)
+def _ensure_file():
+    """Создаёт файл с пустой структурой, если его нет."""
+    if not os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "w") as f:
+            json.dump({"users": {}}, f)
 
 
 def get_data():
-    return data
+    """Читает и возвращает данные из файла."""
+    _ensure_file()
+    with open(DATA_FILE, "r", encoding="UTF-8") as f:
+        return json.load(f)
 
 
 def write(new_data):
-    with open('dan.json', 'w', encoding="UTF-8") as outfile:
-        json.dump(new_data, outfile, ensure_ascii=False, indent=4)
-
-
-init()
+    """Записывает данные в файл."""
+    with open(DATA_FILE, "w", encoding="UTF-8") as f:
+        json.dump(new_data, f, ensure_ascii=False, indent=4)

@@ -75,10 +75,36 @@ async def show_dzen(message: types.Message):
 async def show_dmb(message: types.Message):
     logging.info(f"{message.from_user.id} {time.asctime()} {message.text}")
     if str(message.from_user.id) == config.BASE_ID:  # Проверка на доступ к команде
-        mess = dmb.dmb()
+        mess = dmb.dmb(message.from_user.id)
     else:
         mess = "<b>У вас пока нет доступа к этой команде, обратитесь к разработчику</b>"
     await bot.send_message(message.chat.id, mess, parse_mode='html')
+
+
+@dp.message_handler(commands=['setdmb'])
+async def set_dmb(message: types.Message):
+    logging.info(f"{message.from_user.id} {time.asctime()} {message.text}")
+    if str(message.from_user.id) != config.BASE_ID:
+        await bot.send_message(message.chat.id, "Доступ запрещён", parse_mode='html')
+        return
+
+    args = message.text.split()
+    if len(args) != 4:
+        await bot.send_message(message.chat.id, "Формат: /setdmb ДД ММ ГГГГ", parse_mode='html')
+        return
+
+    try:
+        day = int(args[1])
+        month = int(args[2])
+        year = int(args[3])
+        # Простейшая проверка корректности даты
+        datetime.datetime(year, month, day)
+    except (ValueError, TypeError):
+        await bot.send_message(message.chat.id, "Некорректная дата. Используйте числа.", parse_mode='html')
+        return
+
+    dmb.set_date(message.from_user.id, day, month, year)
+    await bot.send_message(message.chat.id, f"Дата ДМБ установлена: {day:02d}.{month:02d}.{year}", parse_mode='html')
 
 
 @dp.message_handler(commands=['courses'])

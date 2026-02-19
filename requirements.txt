@@ -13,6 +13,7 @@ idna==3.4
 magic-filter==1.0.11
 multidict==6.0.4
 propcache==0.3.2
+python-dotenv==1.2.1
 pytz==2023.3
 requests==2.31.0
 soupsieve==2.4.1
