@@ -1,5 +1,5 @@
 """
-aiogram-2.24
+aiogram-2.25.1
 """
 
 import os
