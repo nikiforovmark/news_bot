@@ -1,72 +1,35 @@
 import asyncio
+import random
 import os
 
-import python_weather
 
+async def get_weather(city: str) -> str:
+    """
+    Возвращает тестовые данные о погоде для указанного города.
+    Заглушка, не требует API.
+    """
+    # Случайная температура от -20 до 30
+    temperature = random.randint(-20, 30)
 
-async def get_weather(city):
-    async with python_weather.Client(unit=python_weather.METRIC) as client:
-        weather = await client.get(city)
+    # Варианты описания погоды (можно дополнить)
+    descriptions = [
+        "Солнечно ☀️", "Облачно ☁️", "Пасмурно ☁️",
+        "Небольшой дождь 🌦️", "Дождь 🌧️", "Снег ❄️",
+        "Туман 🌫️", "Ясно ☀️", "Переменная облачность ⛅"
+    ]
+    description = random.choice(descriptions)
 
-        description = weather.current.description.title()
-        if description == "Sunny":
-            description = "Солнечно"
-        elif description == "Partly Cloudy":
-            description = "Переменная облачность"
-        elif description == "Cloudy":
-            description = "Облачно"
-        elif description == "Very Cloudy":
-            description = "Очень облачно"
-        elif description == "Fog" or description == "Mist":
-            description = "Туман"
-        elif description == "Light Showers" or description == "Light Shower":
-            description = "Небольшие кратковременные ливни"
-        elif description == "Light Rain":
-            description = "Небольшой дождь"
-        elif description == "Light Snow":
-            description = "Небольшой снегопад"
-        elif description == "Snow Shower":
-            description = "Снегопад"
-        elif description == "Heavy Snow":
-            description = "Сильный снегопад"
-        elif description == "Heavy Showers" or description == "Heavy Shower":
-            description = "Сильные кратковременные дожди"
-        elif description == "Heavy Rain":
-            description = "Ливень"
-        elif description == "Light Snow Showers" or description == "Light Snow Shower":
-            description = "Кратковременные небольшие снегопады"
-        elif description == "Light Freezing Drizzle":
-            description = "Легкая изморозь"
-        elif description == "Light Sleet Showers" or description == "Light Sleet Shower":
-            description = "Кратковременный небольшой мокрый снег"
-        elif description == "Light Sleet":
-            description = "Небольшой мокрый снег"
-        elif description == "Rain And Snow Shower":
-            description = "Дождь со снегом"
-        elif description == "Thundery Showers" or description == "Thundery Shower":
-            description = "Грозовые дожди"
-        elif description == "Thundery Heavy Rain":
-            description = "Грозовые ливни"
-        elif description == "Thundery Snow Showers" or description == "Thundery Snow Shower":
-            description = "Грозовые снегопады"
-        elif description == "Heavy Snow Showers" or description == "Heavy Snow Shower":
-            description = "Сильные ливни со снегом"
-        elif description == "Clear":
-            description = "Ясно"
-        elif description == "Overcast":
-            description = "Пасмурно"
-        else:
-            pass
+    # Скорость ветра от 0 до 15 м/с
+    wind_speed = round(random.uniform(0, 15), 1)
 
-        return f"Погода {city}:\n" \
-               f"Температура воздуха: {weather.current.temperature} °C\n" \
-               f"{description} {weather.current.kind.emoji}\n" \
-               f"Ветер: {round(weather.current.wind_speed / 3.6, 2)} м/с"
+    return (f"Погода {city} (тестовые данные):\n"
+            f"Температура воздуха: {temperature} °C\n"
+            f"{description}\n"
+            f"Ветер: {wind_speed} м/с")
 
 
 if __name__ == "__main__":
-    # see https://stackoverflow.com/questions/45600579/asyncio-event-loop-is-closed-when-getting-loop
-    # for more details
+    # Для Windows исправление политики цикла событий
     if os.name == "nt":
         asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
